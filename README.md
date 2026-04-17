@@ -29,7 +29,7 @@ Build the project using CMake (this will dynamically link the necessary OpenGL l
 
 - Watch the console as the engine initializes the OpenGL 4.6 context and compiles the vertex/fragment shaders!
 
-  We recommend using vcpkg or pacman to ensure all C++ dependencies (GLFW, GLM, GLAD) are in your path.
+  (We recommend using vcpkg or pacman to ensure all C++ dependencies (GLFW, GLM, GLAD) are in your path.)
 
     Launch the engine:
         
