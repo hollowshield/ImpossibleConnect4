@@ -28,6 +28,10 @@ In testing, the AI won 80 out of 80 games, including games against an opponent u
 | Close window | Quit |
 
 In normal mode the AI plays **red** and moves first, and you play **yellow**. In easy mode the roles swap: you move first as red.
+## Download
+
+Grab the latest Windows build from the [Releases page](../../releases/latest),
+unzip it, and run `connect4.exe`. No installation needed.
 
 ## Building
 
