@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{9cfbf17b-a707-45ce-80e4-9b61a9263f1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{95b4e582-fee1-4292-82b3-67a2576fbab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_assert.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_asyncio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_atomic.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_audio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_begin_code.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_bits.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_blendmode.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_camera.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_clipboard.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_close_code.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_copying.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_cpuinfo.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_dialog.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_dlopennote.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_egl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_endian.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_error.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_events.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_filesystem.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_gamepad.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_gpu.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_guid.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_haptic.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_hidapi.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_hints.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_init.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_intrin.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_iostream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_joystick.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_keyboard.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_keycode.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_loadso.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_locale.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_log.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_main.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_main_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_messagebox.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_metal.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_misc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_mouse.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_mutex.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_oldnames.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles2.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles2_gl2.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles2_gl2ext.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles2_gl2platform.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengles2_khrplatform.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_opengl_glext.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_pen.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_pixels.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_platform.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_platform_defines.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_power.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_process.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_properties.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_rect.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_render.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_revision.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_scancode.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_sensor.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_stdinc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_storage.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_surface.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_system.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_assert.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_common.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_compare.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_crc32.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_font.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_fuzzer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_harness.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_log.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_md5.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_test_memory.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_thread.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_time.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_timer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_touch.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_tray.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_version.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_video.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include\SDL3\SDL_vulkan.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Connect4Solver.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="Connect4Book.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64\SDL3.pdb">
+      <Filter>lib</Filter>
+    </None>
+    <None Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64\SDL3.dll">
+      <Filter>lib</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64\SDL3_test.lib">
+      <Filter>lib</Filter>
+    </Library>
+    <Library Include="..\..\..\Downloads\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64\SDL3.lib">
+      <Filter>lib</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
