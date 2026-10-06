@@ -16,6 +16,7 @@ In testing, the AI won 80 out of 80 games, including games against an opponent u
 - **Mouse controls.** The column under your cursor is highlighted on your turn.
 - **Status in the title bar.** It shows whose turn it is, when the AI is thinking, and the result.
 - **Win and draw detection**, with instant restart.
+- **Easy mode.** You move first, so a win is theoretically possible, but only with near-perfect play.
 
 ## Controls
 
@@ -23,9 +24,10 @@ In testing, the AI won 80 out of 80 games, including games against an opponent u
 |---|---|
 | Left click | Drop a piece in the hovered column |
 | R | Restart the game |
+| E | Toggle easy mode (starts a new game) |
 | Close window | Quit |
 
-The AI plays **red** and moves first. You play **yellow**.
+In normal mode the AI plays **red** and moves first, and you play **yellow**. In easy mode the roles swap: you move first as red.
 
 ## Building
 
@@ -73,7 +75,7 @@ cmake --build build --config Release
 ```
 ├── WindowManager.cpp   # SDL3 window, rendering, input, and game loop
 ├── Connect4Solver.h    # Perfect-play solver (bitboards + alpha-beta search)
-└── Connect4Book.h      # Precomputed opening book (1,033 positions)
+└── Connect4Book.h      # Precomputed opening book (1,040 positions)
 ```
 
 ## How the AI Works
@@ -101,15 +103,19 @@ On each turn the AI picks, in order of preference:
 3. A move that holds a draw
 4. If losing, the move that delays defeat the longest, in case the opponent makes a mistake
 
-## Configuration
+## Easy Mode
 
-To let the human move first, change this line in `WindowManager.cpp`:
+Press **E** in-game, or set this at the top of `WindowManager.cpp`:
 
 ```cpp
-const int AI_PLAYER = PLAYER2;
+bool easyMode = true;
 ```
 
-The AI will still play perfectly and will win the moment you make a mistake. However, a flawless first player can beat it, since that's what the math says. The opening book only covers games where the AI moves first, so its early moves will also be slower in this mode.
+In easy mode you move first. Since the first player can always force a win, victory is possible, but the AI punishes the slightest mistake.
+
+To keep it responsive, the AI gets a thinking budget in easy mode (3 seconds per move by default, set by `EASY_MODE_TIME_LIMIT`). On its 2nd and 3rd moves, a full search can exceed that budget, and it plays a strong heuristic move instead. From its 4th move on, it searches to the end every time. When the AI is in a lost position, it picks the move that delays defeat the longest.
+
+Your best bet is to open in the center column.
 
 ## Credits
 

@@ -17,11 +17,28 @@ const int SCREEN_HEIGHT = ROWS * CELL_SIZE;
 
 enum Player { EMPTY = 0, PLAYER1 = 1, PLAYER2 = 2 };
 
-// Connect 4 is solved: the FIRST player wins with perfect play.
-// So the AI must be PLAYER1 to guarantee a win. If you set this to PLAYER2,
-// the AI still plays perfectly and wins whenever you make a mistake.
-const int AI_PLAYER = PLAYER2;
-const int HUMAN_PLAYER = (AI_PLAYER == PLAYER1) ? PLAYER2 : PLAYER1;
+// ---------------------------------------------------------------------------
+// GAME OPTIONS
+//
+// Connect 4 is solved: the FIRST player can always force a win.
+//
+//   Normal mode (easyMode = false): the AI moves first and is guaranteed to win.
+//   Easy mode   (easyMode = true):  YOU move first. With perfect play you can
+//                                   win, but the AI punishes any mistake.
+//
+// You can also toggle this in-game with the E key (starts a new game).
+// ---------------------------------------------------------------------------
+bool easyMode = false;
+
+// Per-move thinking budget for the AI in easy mode, in seconds. Early in the
+// game, if the AI can't finish its search in time it plays a strong heuristic
+// move instead; by its 4th move it searches to the end every time.
+// Normal mode has no limit (it doesn't need one thanks to the opening book).
+const double EASY_MODE_TIME_LIMIT = 3.0;
+
+// Whoever moves first plays red (PLAYER1). Set by resetGame().
+int AI_PLAYER = PLAYER1;
+int HUMAN_PLAYER = PLAYER2;
 
 int board[ROWS][COLS] = { EMPTY };
 int currentPlayer = PLAYER1;
@@ -72,7 +89,8 @@ bool checkWin() {
 }
 
 void updateTitle(SDL_Window* window, const char* status) {
-    std::string title = std::string("Connect Four - ") + status;
+    std::string title = std::string("SDL3 Connect Four [") + (easyMode ? "Easy" : "Normal") +
+        " - you are " + (HUMAN_PLAYER == PLAYER1 ? "Red" : "Yellow") + "] - " + status;
     SDL_SetWindowTitle(window, title.c_str());
 }
 
@@ -107,6 +125,8 @@ void resetGame(SDL_Window* window) {
         for (int c = 0; c < COLS; c++)
             board[r][c] = EMPTY;
     position = c4::Position();
+    AI_PLAYER = easyMode ? PLAYER2 : PLAYER1;
+    HUMAN_PLAYER = easyMode ? PLAYER1 : PLAYER2;
     currentPlayer = PLAYER1;
     gameOver = false;
     updateTitle(window, currentPlayer == AI_PLAYER ? "AI thinking..." : "Your turn");
@@ -166,12 +186,14 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* renderer = nullptr;
 
     // SDL3 groups window and renderer setup into a clean, single call
-    if (!SDL_CreateWindowAndRenderer("Connect Four", SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("SDL3 Connect Four", SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer)) {
         std::cerr << "Failed to create SDL3 Window/Renderer: " << SDL_GetError() << std::endl;
         SDL_Quit();
         return 1;
     }
 
+    std::cout << "Connect Four: click a column to drop a piece.\n"
+        << "R = restart, E = toggle easy mode (you move first)\n";
     resetGame(window);
 
     bool quit = false;
@@ -205,6 +227,13 @@ int main(int argc, char* argv[]) {
             else if (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_R && !aiThinking) {
                 resetGame(window);
             }
+            // E toggles easy mode and starts a new game
+            else if (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_E && !aiThinking) {
+                easyMode = !easyMode;
+                std::cout << (easyMode ? "Easy mode: you move first. Good luck!\n"
+                    : "Normal mode: the AI moves first.\n");
+                resetGame(window);
+            }
         }
 
         // Start an AI search when it's the AI's turn
@@ -212,7 +241,10 @@ int main(int argc, char* argv[]) {
             aiThinking = true;
             aiStart = std::chrono::steady_clock::now();
             c4::Position snapshot = position;
-            aiFuture = std::async(std::launch::async, [snapshot]() { return solver.bestMove(snapshot); });
+            double timeLimit = easyMode ? EASY_MODE_TIME_LIMIT : 0.0;   // 0 = unlimited
+            aiFuture = std::async(std::launch::async, [snapshot, timeLimit]() {
+                return solver.bestMove(snapshot, timeLimit);
+                });
         }
 
         // Collect the AI's move once the search finishes
@@ -220,7 +252,8 @@ int main(int argc, char* argv[]) {
             int col = aiFuture.get();
             aiThinking = false;
             double secs = std::chrono::duration<double>(std::chrono::steady_clock::now() - aiStart).count();
-            std::cout << "AI plays column " << (col + 1) << " (" << secs << "s)\n";
+            std::cout << "AI plays column " << (col + 1) << " (" << secs << "s"
+                << (solver.lastMoveTimedOut() ? ", out of time - heuristic move" : "") << ")\n";
             applyMove(window, col);
         }
 

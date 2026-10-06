@@ -8,6 +8,7 @@
 //   < 0 : loss (smaller = loses sooner)
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <vector>
 
@@ -69,6 +70,7 @@ namespace c4 {
 
         // Heuristic for move ordering: how many winning spots a move creates.
         int moveScore(uint64_t move) const { return popcount(computeWinningPosition(current | move, mask)); }
+        int moveScoreCol(int col) const { return moveScore((mask + bottomMask(col)) & columnMask(col)); }
 
     private:
         uint64_t current = 0, mask = 0;
@@ -101,6 +103,9 @@ namespace c4 {
         std::atomic<bool> abort{ false };   // set from another thread to stop a search
         unsigned long long nodes = 0;
 
+        // True if the last bestMove() ran out of time and used the heuristic fallback.
+        bool lastMoveTimedOut() const { return timedOut; }
+
         Solver() : tableSize(nextPrime(1u << 24)), keys(tableSize, 0), values(tableSize, 0) {}
 
         // Exact score of a position (player to move's perspective).
@@ -120,7 +125,17 @@ namespace c4 {
 
         // Column (0..6) that is best for the player to move.
         // Prefers: immediate win > any forced win > draw > slowest loss.
-        int bestMove(const Position& P) {
+        //
+        // timeLimitSeconds <= 0 means unlimited (always perfect).
+        // With a limit, if a search runs out of time the AI falls back to a
+        // heuristic move for this turn (used for easy mode).
+        int bestMove(const Position& P, double timeLimitSeconds = 0) {
+            timedOut = false;
+            hasDeadline = timeLimitSeconds > 0;
+            if (hasDeadline)
+                deadline = Clock::now() + std::chrono::duration_cast<Clock::duration>(
+                    std::chrono::duration<double>(timeLimitSeconds));
+
             // Opening book: instant answers for the slow early-game positions.
             int booked = bookLookup(P.key());
             if (booked >= 0) return booked;
@@ -128,33 +143,73 @@ namespace c4 {
             for (int col : COLUMN_ORDER)
                 if (P.canPlay(col) && P.isWinningMove(col)) return col;
 
-            // Any move that leads to a forced win (one cheap null-window search each).
+            // Moves that don't hand the opponent an immediate win.
+            std::vector<int> safe;
             for (int col : COLUMN_ORDER) {
                 if (!P.canPlay(col)) continue;
                 Position P2(P); P2.playCol(col);
-                if (P2.canWinNext() || P2.movesPlayed() == WIDTH * HEIGHT) continue;
-                if (negamax(P2, -1, 0) < 0) return col;   // opponent loses => we win
+                if (!P2.canWinNext()) safe.push_back(col);
             }
-            // Otherwise, hold the draw.
-            for (int col : COLUMN_ORDER) {
-                if (!P.canPlay(col)) continue;
+            if (safe.empty())   // every move loses on the spot
+                for (int col : COLUMN_ORDER) if (P.canPlay(col)) return col;
+
+            // 1) Any move that leads to a forced win (one cheap null-window search each).
+            for (int col : safe) {
                 Position P2(P); P2.playCol(col);
-                if (P2.canWinNext()) continue;
+                if (P2.movesPlayed() == WIDTH * HEIGHT) continue;
+                int r = negamax(P2, -1, 0);
+                if (stopped()) return fallback(P, safe);
+                if (r < 0) return col;   // opponent loses => we win
+            }
+            // 2) Otherwise, hold the draw.
+            for (int col : safe) {
+                Position P2(P); P2.playCol(col);
                 if (P2.movesPlayed() == WIDTH * HEIGHT) return col;
-                if (negamax(P2, 0, 1) <= 0) return col;
+                int r = negamax(P2, 0, 1);
+                if (stopped()) return fallback(P, safe);
+                if (r <= 0) return col;
             }
-            // Lost against perfect play: delay as long as possible and hope for a mistake.
-            int best = -1, bestScore = -1000;
-            for (int col : COLUMN_ORDER) {
-                if (!P.canPlay(col)) continue;
-                Position P2(P); P2.playCol(col);
-                int s = P2.canWinNext() ? -(WIDTH * HEIGHT + 1 - P2.movesPlayed()) / 2 : -solve(P2);
+            // 3) Lost against perfect play: delay as long as possible.
+            return delayLoss(P, safe);
+        }
+
+    private:
+        using Clock = std::chrono::steady_clock;
+        bool hasDeadline = false;
+        bool timedOut = false;
+        Clock::time_point deadline;
+
+        bool stopped() const { return timedOut || abort.load(std::memory_order_relaxed); }
+
+        // Out of time: pick the candidate that creates the most threats (center-first on ties).
+        static int fallback(const Position& P, const std::vector<int>& candidates) {
+            int best = candidates.front(), bestScore = -1;
+            for (int col : candidates) {
+                int s = P.moveScoreCol(col);
                 if (s > bestScore) { bestScore = s; best = col; }
             }
             return best;
         }
 
-    private:
+        // In a lost position, find the move where the opponent's win takes longest.
+        // Fast losses are cheap to detect, so we eliminate the quickest-losing moves
+        // first and stop as soon as only one candidate is left.
+        int delayLoss(const Position& P, std::vector<int> remaining) {
+            int maxScore = (WIDTH * HEIGHT - 1 - (P.movesPlayed() + 1)) / 2;
+            for (int t = maxScore; t >= 1 && remaining.size() > 1; t--) {
+                std::vector<int> slower;
+                for (int col : remaining) {
+                    Position P2(P); P2.playCol(col);
+                    int r = negamax(P2, t - 1, t);
+                    if (stopped()) return fallback(P, remaining);
+                    if (r < t) slower.push_back(col);   // opponent can't win this fast here
+                }
+                if (slower.empty()) return remaining.front();   // all tie
+                remaining = slower;
+            }
+            return remaining.front();
+        }
+
         static int bookLookup(uint64_t key) {
             int lo = 0, hi = OPENING_BOOK_SIZE - 1;
             while (lo <= hi) {
@@ -200,8 +255,8 @@ namespace c4 {
 
         // Precondition: the player to move cannot win immediately.
         int negamax(const Position& P, int alpha, int beta) {
-            if (abort.load(std::memory_order_relaxed)) return 0;
-            nodes++;
+            if ((++nodes & 1023) == 0 && hasDeadline && Clock::now() > deadline) timedOut = true;
+            if (stopped()) return 0;
 
             uint64_t next = P.possibleNonLosingMoves();
             if (next == 0) return -(WIDTH * HEIGHT - P.movesPlayed()) / 2;   // every move loses
@@ -232,7 +287,7 @@ namespace c4 {
             while (uint64_t move = sorter.next()) {
                 Position P2(P); P2.play(move);
                 int score = -negamax(P2, -beta, -alpha);
-                if (abort.load(std::memory_order_relaxed)) return 0;
+                if (stopped()) return 0;   // never store results from an interrupted search
                 if (score >= beta) { ttPut(key, (int8_t)(score + LOWER_OFFSET)); return score; }
                 if (score > alpha) alpha = score;
             }
