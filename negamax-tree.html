@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Negamax, one move at a time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F5F7FB;
+  --ink: #10172A;
+  --muted: #55607A;
+  --board: #2F6FB8;
+  --board-ink: #FFFFFF;
+  --hole: #F5F7FB;
+  --hole-ink: #55607A;
+  --red: #D63A2B;
+  --yellow: #F1C40F;
+  --edge: rgba(255, 255, 255, 0.55);
+  --edge-dim: rgba(255, 255, 255, 0.22);
+  --panel: #FFFFFF;
+  --panel-line: #DCE2EC;
+  --code-bg: #10172A;
+  --code-ink: #E6EAF2;
+  --code-dim: #7E89A3;
+  --hl: rgba(241, 196, 15, 0.20);
+  --focus: #2F6FB8;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1424;
+    --ink: #E8ECF4;
+    --muted: #9AA5BD;
+    --board: #2A63A8;
+    --hole: #0E1424;
+    --hole-ink: #9AA5BD;
+    --panel: #151D31;
+    --panel-line: #26304A;
+    --code-bg: #0A0F1C;
+    --focus: #F1C40F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1424;
+  --ink: #E8ECF4;
+  --muted: #9AA5BD;
+  --board: #2A63A8;
+  --hole: #0E1424;
+  --hole-ink: #9AA5BD;
+  --panel: #151D31;
+  --panel-line: #26304A;
+  --code-bg: #0A0F1C;
+  --focus: #F1C40F;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.45;
+}
+.wrap { max-width: 1280px; margin: 0 auto; padding: 28px clamp(16px, 3vw, 40px) 40px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; margin-bottom: 20px; }
+h1 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.05; letter-spacing: -0.025em; margin: 0; font-weight: 700; }
+.lede { margin: 8px 0 0; color: var(--muted); font-size: 17px; max-width: 62ch; }
+.legend { display: flex; gap: 18px; font-size: 16px; font-weight: 500; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 18px; height: 18px; border-radius: 50%; display: inline-block; }
+.dot.me { background: var(--red); }
+.dot.you { background: var(--yellow); }
+
+.board { background: var(--board); border-radius: 20px; padding: 10px 6px; overflow-x: auto; }
+.board svg { display: block; width: 100%; height: auto; }
+.board.wide svg { min-width: 1000px; }
+
+.console { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 430px); gap: 20px; margin-top: 18px; }
+@media (max-width: 900px) { .console { grid-template-columns: 1fr; } }
+.story { background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button {
+  font: inherit; font-weight: 500; font-size: 15px;
+  border-radius: 10px; border: 1.5px solid var(--panel-line);
+  background: var(--panel); color: var(--ink);
+  padding: 8px 14px; cursor: pointer; min-height: 40px;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--board); border-color: var(--board); color: #FFFFFF; }
+.counter { margin-left: auto; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.narration { font-size: clamp(19px, 2vw, 24px); line-height: 1.35; min-height: 3.2em; margin: 0; font-weight: 500; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 20px; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.stats b { color: var(--ink); font-weight: 600; }
+
+pre.code { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 16px; padding: 16px 0; font-family: "IBM Plex Mono", Consolas, monospace; font-size: 14px; line-height: 1.6; overflow-x: auto; }
+pre.code .ln { display: block; padding: 0 18px; border-left: 4px solid transparent; white-space: pre; }
+pre.code .ln.dim { color: var(--code-dim); }
+pre.code .ln.hl { background: var(--hl); border-left-color: var(--yellow); }
+
+.settings { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; margin-top: 18px; padding: 14px 4px 0; border-top: 1px solid var(--panel-line); }
+.setting { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--muted); }
+.seg { display: inline-flex; border: 1.5px solid var(--panel-line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; min-height: 36px; padding: 6px 12px; }
+.seg button + button { border-left: 1.5px solid var(--panel-line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.editor { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); }
+.editor b { color: var(--ink); min-width: 2.5em; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+kbd { font-family: "IBM Plex Mono", monospace; font-size: 12px; border: 1px solid var(--panel-line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; background: var(--panel); color: var(--ink); }
+
+svg .node { cursor: default; }
+svg .node.leaf { cursor: pointer; }
+svg text { font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif; }
+svg circle, svg line { transition: fill 220ms ease, stroke 220ms ease, opacity 220ms ease; }
+@media (prefers-reduced-motion: reduce) { svg circle, svg line { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Negamax, one move at a time</h1>
+      <p class="lede" id="lede">Every score is from the point of view of whoever is about to move. Each parent flips its children’s scores and keeps the biggest.</p>
+    </div>
+    <div class="legend" aria-label="Legend">
+      <span><i class="dot me"></i>Me to move</span>
+      <span><i class="dot you"></i>You to move</span>
+    </div>
+  </header>
+
+  <div class="board" id="board"><svg id="tree" role="img" aria-label="Game tree"></svg></div>
+
+  <div class="console">
+    <section class="story">
+      <div class="controls">
+        <button id="back" aria-label="Previous step">Back</button>
+        <button id="step" class="primary">Step</button>
+        <button id="play">Play</button>
+        <button id="reset">Start over</button>
+        <span class="counter" id="counter"></span>
+      </div>
+      <p class="narration" id="narration" aria-live="polite"></p>
+      <div class="stats" id="stats"></div>
+    </section>
+    <pre class="code" id="code" aria-label="Negamax code"></pre>
+  </div>
+
+  <div class="settings">
+    <div class="setting">Alpha-beta pruning
+      <div class="seg" role="group" aria-label="Alpha-beta pruning">
+        <button data-prune="off" aria-pressed="true">Off</button>
+        <button data-prune="on" aria-pressed="false">On</button>
+      </div>
+    </div>
+    <div class="setting">Show scores for
+      <div class="seg" role="group" aria-label="Show scores for">
+        <button data-view="mover" aria-pressed="true">Whoever moves</button>
+        <button data-view="me" aria-pressed="false">Me only</button>
+      </div>
+    </div>
+    <div class="setting">Tree
+      <div class="seg" role="group" aria-label="Tree size">
+        <button data-size="small" aria-pressed="false">Small</button>
+        <button data-size="medium" aria-pressed="true">Medium</button>
+        <button data-size="large" aria-pressed="false">Large</button>
+      </div>
+    </div>
+    <button id="shuffle">New scores</button>
+    <div class="editor" id="editor"></div>
+  </div>
+  <p class="hint">Keys: <kbd>→</kbd> step, <kbd>←</kbd> back, <kbd>Space</kbd> play or pause, <kbd>P</kbd> pruning, <kbd>Home</kbd> start over. Click a bottom position to change its score.</p>
+</div>
+
+<script>
+const SIZES = { small: { b: 2, d: 2 }, medium: { b: 2, d: 3 }, large: { b: 3, d: 3 } };
+const DEFAULTS = {
+  small: [-1, 3, -3, -6],
+  medium: [7, -4, -6, 1, -3, 5, 3, -1],
+  large: [2, -3, 5, 4, -1, 6, -2, 7, 1, 3, 8, -5, -6, 2, 4, 1, -3, 9, 5, -7, 2, -1, 4, 3, 6, -2, -8],
+};
+const state = {
+  size: "medium", prune: false, view: "mover", step: 0, playing: false, timer: null, selected: null,
+  leaves: { small: DEFAULTS.small.slice(), medium: DEFAULTS.medium.slice(), large: DEFAULTS.large.slice() },
+};
+let nodes = [], steps = [];
+
+const fmt = v => v === Infinity ? "+∞" : v === -Infinity ? "−∞" : v > 0 ? "+" + v : v < 0 ? "−" + Math.abs(v) : "0";
+const who = n => n.depth % 2 === 0 ? "Me" : "You";
+const flipBound = b => b === "≥" ? "≤" : b === "≤" ? "≥" : "";
+
+function buildTree() {
+  const { b, d } = SIZES[state.size];
+  nodes = []; let lc = 0;
+  (function make(depth, parent) {
+    const id = nodes.length;
+    const n = { id, depth, parent, children: [], leaf: null };
+    nodes.push(n);
+    if (depth === d) n.leaf = lc++;
+    else for (let i = 0; i < b; i++) n.children.push(make(depth + 1, id));
+    return id;
+  })(0, null);
+}
+
+function computeSteps() {
+  const leaves = state.leaves[state.size];
+  const N = nodes.length;
+  const cur = {
+    status: Array(N).fill("idle"), val: Array(N).fill(null), bound: Array(N).fill(""),
+    edge: Array(N).fill(null), edgeBound: Array(N).fill(""), best: Array(N).fill(null),
+    win: Array(N).fill(null), active: null, line: null, text: "", visited: 0, pruned: 0, final: false,
+  };
+  steps = [];
+  const snap = (text, line, active) => {
+    cur.text = text; cur.line = line; cur.active = active;
+    steps.push(JSON.parse(JSON.stringify(cur, (k, v) => v === Infinity ? "INF" : v === -Infinity ? "-INF" : v),
+      (k, v) => v === "INF" ? Infinity : v === "-INF" ? -Infinity : v));
+  };
+  const prune = state.prune;
+  snap("It’s Me to move at the top. Press Step to try each move and see how You can answer.", null, null);
+
+  function pruneSub(id) { cur.status[id] = "pruned"; cur.pruned++; nodes[id].children.forEach(pruneSub); }
+
+  function nm(id, a, bt) {
+    const n = nodes[id];
+    cur.visited++;
+    if (prune) cur.win[id] = [a, bt];
+    if (n.leaf !== null) {
+      const v = leaves[n.leaf];
+      cur.val[id] = v; cur.status[id] = "done";
+      snap(`No more moves to look at. This position is worth ${fmt(v)} for ${who(n)}.`, 2, id);
+      return { v, type: "exact" };
+    }
+    cur.status[id] = "active";
+    snap(`${who(n)} to move here, with ${n.children.length} moves to try.` +
+      (prune ? ` Window: α = ${fmt(a)}, β = ${fmt(bt)}.` : ""), 1, id);
+    let best = prune ? a : -Infinity;
+    let improved = false;
+    for (let i = 0; i < n.children.length; i++) {
+      const cid = n.children[i];
+      const r = prune ? nm(cid, -bt, -best) : nm(cid, -Infinity, Infinity);
+      const score = -r.v;
+      const childWord = r.type === "lower" ? `at least ${fmt(r.v)}` : r.type === "upper" ? `at most ${fmt(r.v)}` : fmt(r.v);
+      const myBound = r.type === "lower" ? "≤" : r.type === "upper" ? "≥" : "";
+      const myWord = myBound === "≤" ? `at most ${fmt(score)}` : myBound === "≥" ? `at least ${fmt(score)}` : fmt(score);
+      cur.edge[cid] = score; cur.edgeBound[cid] = myBound; cur.status[id] = "active";
+      snap(`That move is worth ${childWord} for ${who(nodes[cid])}, so flip it: ${myWord} for ${who(n)}.`, 4, id);
+      if (prune && score >= bt) {
+        n.children.slice(i + 1).forEach(pruneSub);
+        cur.val[id] = score; cur.bound[id] = "≥"; cur.best[id] = cid; cur.status[id] = "done";
+        const skipped = n.children.length - i - 1;
+        snap(`${fmt(score)} ≥ β (${fmt(bt)}). ${n.parent === null ? "" : who(nodes[n.parent]) + " already has a better option elsewhere, so they’d never let the game get here. "}` +
+          (skipped ? `Skip the other ${skipped === 1 ? "move" : skipped + " moves"}.` : "Nothing left to skip."), 5, id);
+        return { v: score, type: "lower" };
+      }
+      if (score > best) {
+        best = score; improved = true; cur.best[id] = cid;
+        snap(`${fmt(score)} is the best so far for ${who(n)}.`, 6, id);
+      } else {
+        snap(`${fmt(score)} isn’t better than ${fmt(best)}, so ${who(n)} keeps the old best.`, 6, id);
+      }
+    }
+    cur.val[id] = best; cur.status[id] = "done";
+    const type = prune && !improved ? "upper" : "exact";
+    if (type === "upper") cur.bound[id] = "≤";
+    snap(type === "upper"
+      ? `Nothing here beat α, so all ${who(n)} knows is it’s at most ${fmt(best)}. That’s enough for the move above.`
+      : `Best for ${who(n)} here: ${fmt(best)}.`, 8, id);
+    return { v: best, type };
+  }
+
+  const res = nm(0, -Infinity, Infinity);
+  cur.final = true;
+  const choice = nodes[0].children.indexOf(cur.best[0]) + 1;
+  snap(`Answer: Me plays move ${choice}, worth ${fmt(res.v)}. ` +
+    (prune ? `Looked at ${cur.visited} of ${N} positions and skipped ${cur.pruned}.` : `Looked at all ${N} positions.`), null, null);
+}
+
+const CODE = {
+  off: [
+    "int negamax(node) {",
+    "  if (no moves left) return node.score;",
+    "  int best = -INFINITY;",
+    "  for (child : node.children) {",
+    "    int score = -negamax(child);   // flip",
+    "",
+    "    if (score > best) best = score;",
+    "  }",
+    "  return best;",
+    "}",
+  ],
+  on: [
+    "int negamax(node, alpha, beta) {",
+    "  if (no moves left) return node.score;",
+    "",
+    "  for (child : node.children) {",
+    "    int score = -negamax(child, -beta, -alpha);",
+    "    if (score >= beta) return score;   // cutoff",
+    "    if (score > alpha) alpha = score;",
+    "  }",
+    "  return alpha;",
+    "}",
+  ],
+};
+// step line ids -> code row index
+const LINE_ROW = { 1: 0, 2: 1, 4: 4, 5: 5, 6: 6, 8: 8 };
+
+function renderCode(line) {
+  const rows = CODE[state.prune ? "on" : "off"];
+  const hl = line == null ? -1 : LINE_ROW[line];
+  document.getElementById("code").innerHTML = rows
+    .map((t, i) => `<span class="ln${i === hl ? " hl" : ""}${t === "" ? " dim" : ""}">${t === "" ? " " : escapeHtml(t)}</span>`)
+    .filter((_, i) => rows[i] !== "")
+    .join("");
+}
+function escapeHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function layout() {
+  const { b, d } = SIZES[state.size];
+  const L = b ** d;
+  const left = 96, right = 24;
+  const W = Math.max(860, L * 64 + left + right);
+  const rowH = d >= 3 ? 128 : 150;
+  const top = 56;
+  const H = top * 2 + d * rowH - 10;
+  const span = (W - left - right) / L;
+  const pos = [];
+  nodes.forEach(n => {
+    if (n.leaf !== null) pos[n.id] = { x: left + (n.leaf + 0.5) * span, y: top + n.depth * rowH };
+  });
+  for (let k = nodes.length - 1; k >= 0; k--) {
+    const n = nodes[k];
+    if (n.leaf === null) {
+      const xs = n.children.map(c => pos[c].x);
+      pos[n.id] = { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: top + n.depth * rowH };
+    }
+  }
+  const r = Math.min(30, span * 0.36);
+  return { W, H, pos, r, rowH, top, d };
+}
+
+function render() {
+  const s = steps[state.step];
+  const { W, H, pos, r, rowH, top, d } = layout();
+  const svg = document.getElementById("tree");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  document.getElementById("board").classList.toggle("wide", state.size === "large");
+
+  // winning path
+  const path = new Set();
+  if (s.final) { let id = 0; while (s.best[id] != null) { path.add(s.best[id]); id = s.best[id]; } }
+
+  let out = "";
+  for (let dep = 0; dep <= d; dep++) {
+    const me = dep % 2 === 0;
+    const y = top + dep * rowH;
+    out += `<circle cx="22" cy="${y}" r="8" fill="${me ? "var(--red)" : "var(--yellow)"}"/>` +
+      `<text x="38" y="${y + 6}" fill="var(--board-ink)" font-size="17" font-weight="600">${me ? "Me" : "You"}</text>`;
+  }
+  nodes.forEach(n => {
+    if (n.parent === null) return;
+    const p = pos[n.parent], c = pos[n.id];
+    const pruned = s.status[n.id] === "pruned";
+    const onPath = path.has(n.id);
+    out += `<line x1="${p.x}" y1="${p.y}" x2="${c.x}" y2="${c.y}" stroke="${onPath ? "var(--yellow)" : pruned ? "var(--edge-dim)" : "var(--edge)"}"` +
+      ` stroke-width="${onPath ? 7 : 2.5}" ${pruned ? 'stroke-dasharray="6 6"' : ""} stroke-linecap="round"/>`;
+  });
+  if (state.view === "mover") {
+    nodes.forEach(n => {
+      if (n.parent === null || s.edge[n.id] == null) return;
+      const p = pos[n.parent], c = pos[n.id];
+      const t = 0.5;
+      const x = p.x + (c.x - p.x) * t, y = p.y + (c.y - p.y) * t;
+      const label = (s.edgeBound[n.id] || "") + fmt(s.edge[n.id]);
+      const w = 14 + label.length * 9;
+      out += `<rect x="${x - w / 2}" y="${y - 13}" width="${w}" height="26" rx="13" fill="var(--paper)"/>` +
+        `<text x="${x}" y="${y + 6}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">${label}</text>`;
+    });
+  }
+  nodes.forEach(n => {
+    const { x, y } = pos[n.id];
+    const st = s.status[n.id];
+    const me = n.depth % 2 === 0;
+    const disc = me ? "var(--red)" : "var(--yellow)";
+    const done = st === "done";
+    const active = s.active === n.id;
+    let fill = done ? disc : "var(--hole)";
+    let ring = active ? "#FFFFFF" : done ? "none" : disc;
+    let ringW = active ? 6 : done ? 0 : 3.5;
+    let v = null, bnd = "";
+    if (done && s.val[n.id] != null) { v = s.val[n.id]; bnd = s.bound[n.id]; }
+    else if (n.leaf !== null) { v = state.leaves[state.size][n.leaf]; }
+    if (v != null && state.view === "me" && !me) { v = -v; bnd = flipBound(bnd); }
+    const label = v == null ? "" : bnd + fmt(v);
+    const ink = done ? (me ? "#FFFFFF" : "#10172A") : "var(--hole-ink)";
+    const sel = state.selected === n.id;
+    out += `<g class="node${n.leaf !== null ? " leaf" : ""}" data-id="${n.id}" opacity="${st === "pruned" ? 0.3 : 1}"` +
+      (n.leaf !== null ? ` tabindex="0" role="button" aria-label="End position worth ${fmt(state.leaves[state.size][n.leaf])}. Click to edit."` : "") + `>` +
+      `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${ring}" stroke-width="${ringW}"/>` +
+      (sel ? `<circle cx="${x}" cy="${y}" r="${r + 8}" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-dasharray="5 4"/>` : "") +
+      `<text x="${x}" y="${y + 6}" text-anchor="middle" font-size="${label.length > 3 ? 14 : 17}" font-weight="700" fill="${ink}">${label}</text></g>`;
+    if (state.prune && s.win[n.id] && active && n.leaf === null) {
+      const [a, bt] = s.win[n.id];
+      out += `<text x="${x}" y="${y - r - 12}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--board-ink)">α ${fmt(a)}  β ${fmt(bt)}</text>`;
+    }
+  });
+  svg.innerHTML = out;
+
+  document.getElementById("narration").textContent = s.text;
+  document.getElementById("counter").textContent = `Step ${state.step} of ${steps.length - 1}`;
+  const total = nodes.length;
+  document.getElementById("stats").innerHTML =
+    `<span>Positions looked at: <b>${s.visited}</b> of ${total}</span>` +
+    (state.prune ? `<span>Skipped: <b>${s.pruned}</b></span>` : "");
+  renderCode(s.line);
+  document.getElementById("lede").textContent = state.view === "me"
+    ? "Scores shown from Me’s side, like minimax: Me wants big numbers, You wants small ones. The code still flips signs behind the scenes."
+    : "Every score is from the point of view of whoever is about to move. Each parent flips its children’s scores and keeps the biggest.";
+  document.getElementById("back").disabled = state.step === 0;
+  document.getElementById("step").disabled = state.step === steps.length - 1;
+  document.getElementById("play").textContent = state.playing ? "Pause" : "Play";
+  renderEditor();
+}
+
+function renderEditor() {
+  const ed = document.getElementById("editor");
+  if (state.selected == null) { ed.innerHTML = ""; return; }
+  const n = nodes[state.selected];
+  const v = state.leaves[state.size][n.leaf];
+  ed.innerHTML = `Selected position <button id="dec" aria-label="Lower the score">−</button><b>${fmt(v)}</b><button id="inc" aria-label="Raise the score">+</button>`;
+  document.getElementById("dec").onclick = () => changeLeaf(-1);
+  document.getElementById("inc").onclick = () => changeLeaf(1);
+}
+
+function changeLeaf(delta) {
+  const n = nodes[state.selected];
+  const arr = state.leaves[state.size];
+  arr[n.leaf] = Math.max(-18, Math.min(18, arr[n.leaf] + delta));
+  rebuild(false);
+}
+
+function rebuild(resetSelection = true) {
+  stop();
+  if (resetSelection) state.selected = null;
+  buildTree();
+  computeSteps();
+  state.step = 0;
+  render();
+}
+
+function go(i) { state.step = Math.max(0, Math.min(steps.length - 1, i)); render(); }
+function stop() { state.playing = false; clearInterval(state.timer); state.timer = null; }
+function togglePlay() {
+  if (state.playing) { stop(); render(); return; }
+  if (state.step === steps.length - 1) state.step = 0;
+  state.playing = true;
+  state.timer = setInterval(() => {
+    if (state.step >= steps.length - 1) { stop(); render(); return; }
+    go(state.step + 1);
+  }, 1100);
+  render();
+}
+
+document.getElementById("step").onclick = () => { stop(); go(state.step + 1); };
+document.getElementById("back").onclick = () => { stop(); go(state.step - 1); };
+document.getElementById("reset").onclick = () => { stop(); go(0); };
+document.getElementById("play").onclick = togglePlay;
+document.getElementById("shuffle").onclick = () => {
+  const arr = state.leaves[state.size];
+  for (let i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 19) - 9;
+  rebuild();
+};
+function setPressed(attr, val) {
+  document.querySelectorAll(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attr] === val)));
+}
+document.querySelectorAll("[data-prune]").forEach(b => b.onclick = () => { state.prune = b.dataset.prune === "on"; setPressed("prune", b.dataset.prune); rebuild(false); });
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { state.view = b.dataset.view; setPressed("view", state.view); render(); });
+document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { state.size = b.dataset.size; setPressed("size", state.size); rebuild(); });
+
+function selectLeaf(el) {
+  const id = Number(el.dataset.id);
+  state.selected = state.selected === id ? null : id;
+  render();
+}
+document.getElementById("tree").addEventListener("click", e => {
+  const g = e.target.closest(".node.leaf");
+  if (g) selectLeaf(g);
+});
+document.getElementById("tree").addEventListener("keydown", e => {
+  const g = e.target.closest && e.target.closest(".node.leaf");
+  if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.stopPropagation(); selectLeaf(g); }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest(".node.leaf") && (e.key === "Enter" || e.key === " ")) return;
+  if (e.key === "ArrowRight") { e.preventDefault(); stop(); go(state.step + 1); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); stop(); go(state.step - 1); }
+  else if (e.key === " " && e.target.tagName !== "BUTTON") { e.preventDefault(); togglePlay(); }
+  else if (e.key === "Home") { e.preventDefault(); stop(); go(0); }
+  else if (e.key === "p" || e.key === "P") { state.prune = !state.prune; setPressed("prune", state.prune ? "on" : "off"); rebuild(false); }
+  else if ((e.key === "+" || e.key === "=") && state.selected != null) changeLeaf(1);
+  else if (e.key === "-" && state.selected != null) changeLeaf(-1);
+});
+
+rebuild();
+</script>
+</body>
+</html>
